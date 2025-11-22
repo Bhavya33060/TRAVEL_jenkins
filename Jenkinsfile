@@ -14,8 +14,8 @@ pipeline {
         FRONTEND_DIR = 'travel-frontend'
         BACKEND_DIR  = 'travel-backend'
 
-        BACKEND_WAR  = "${BACKEND_DIR}/target/travel.war"
-        FRONTEND_WAR = "${FRONTEND_DIR}/dist.war"
+        BACKEND_WAR  = "travel-backend/target/travel.war"
+        FRONTEND_WAR = "travel-frontend/dist.war"
     }
 
     stages {
@@ -42,8 +42,8 @@ pipeline {
 
         stage('Package Frontend WAR') {
             steps {
-                script {
-                    bat "cd ${FRONTEND_DIR} && jar -cvf dist.war -C dist ."
+                dir("${FRONTEND_DIR}") {
+                    bat 'jar -cvf dist.war -C dist .'
                 }
             }
         }
@@ -58,13 +58,13 @@ pipeline {
 
         stage('Deploy Backend to Tomcat') {
             steps {
-                bat "curl -u %TOMCAT_USER%:%TOMCAT_PASS% --upload-file \"%BACKEND_WAR%\" \"%TOMCAT_URL%/deploy?path=/travel-be&update=true\""
+                bat "curl -u ${TOMCAT_USER}:${TOMCAT_PASS} --upload-file \"${BACKEND_WAR}\" \"${TOMCAT_URL}/deploy?path=/travel-be&update=true\""
             }
         }
 
         stage('Deploy Frontend to Tomcat') {
             steps {
-                bat "curl -u %TOMCAT_USER%:%TOMCAT_PASS% --upload-file \"%FRONTEND_WAR%\" \"%TOMCAT_URL%/deploy?path=/travel-ui&update=true\""
+                bat "curl -u ${TOMCAT_USER}:${TOMCAT_PASS} --upload-file \"${FRONTEND_WAR}\" \"${TOMCAT_URL}/deploy?path=/travel-ui&update=true\""
             }
         }
     }
