@@ -26,7 +26,7 @@ pipeline {
                     def nodeHome = tool name: 'NODE_HOME', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
                     env.PATH = "${nodeHome}/bin:${env.PATH}"
                 }
-                dir("${FRONTEND_DIR}") {
+                dir("${env.FRONTEND_DIR}") {
                     bat 'npm install --legacy-peer-deps'
                 }
             }
@@ -34,7 +34,7 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                dir("${FRONTEND_DIR}") {
+                dir("${env.FRONTEND_DIR}") {
                     bat 'npm run build'
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
 
         stage('Package Frontend WAR') {
             steps {
-                dir("${FRONTEND_DIR}") {
+                dir("${env.FRONTEND_DIR}") {
                     bat 'jar -cvf dist.war -C dist .'
                 }
             }
@@ -50,7 +50,7 @@ pipeline {
 
         stage('Build Backend WAR') {
             steps {
-                dir("${BACKEND_DIR}") {
+                dir("${env.BACKEND_DIR}") {
                     bat 'mvn clean package -DskipTests'
                 }
             }
@@ -58,13 +58,13 @@ pipeline {
 
         stage('Deploy Backend to Tomcat') {
             steps {
-                bat "curl -u ${TOMCAT_USER}:${TOMCAT_PASS} --upload-file \"${BACKEND_WAR}\" \"${TOMCAT_URL}/deploy?path=/travel-be&update=true\""
+                bat "curl -u ${env.TOMCAT_USER}:${env.TOMCAT_PASS} --upload-file \"${env.BACKEND_WAR}\" \"${env.TOMCAT_URL}/deploy?path=/travel-be&update=true\""
             }
         }
 
         stage('Deploy Frontend to Tomcat') {
             steps {
-                bat "curl -u ${TOMCAT_USER}:${TOMCAT_PASS} --upload-file \"${FRONTEND_WAR}\" \"${TOMCAT_URL}/deploy?path=/travel-ui&update=true\""
+                bat "curl -u ${env.TOMCAT_USER}:${env.TOMCAT_PASS} --upload-file \"${env.FRONTEND_WAR}\" \"${env.TOMCAT_URL}/deploy?path=/travel-ui&update=true\""
             }
         }
     }
